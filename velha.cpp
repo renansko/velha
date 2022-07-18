@@ -11,8 +11,8 @@ using namespace std;
 char numbers[9] = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 char digit[9] = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
-const char* password = seguro;
-const char* user = user;
+char* password = seguro;
+char* user = username;
 
 void bd()
 {
@@ -74,11 +74,11 @@ char* login(void)
         exit(1);
     }
 
-    char* a, email[100];
+    char* email{};
     cout << "----------------------\n";
     cout << "Digite sua nome:    " << endl;
 
-    char* b, password[100];
+    char* password{};
     cout << "----------------------\n";
     cout << "Digite sua senha:    " << endl;
     const char* value = "*";
@@ -105,7 +105,7 @@ char* login(void)
     return email;
 }
 
-int registrar() {
+void registrar() {
     MYSQL* conn = mysql_init(NULL);
     char query[150] = "";
 
@@ -125,7 +125,7 @@ int registrar() {
     cout << "REGISTRAR" << endl;
     cout << "----------------------\n";
     cout << "Digite seu email:    " << endl;
-    char* p, email[100];
+    char* email;
 
     const char* value = "*";
     const char* table = "USERS";
@@ -144,11 +144,11 @@ int registrar() {
         exit(1);
     }
 
-    char* a, nome[100];
+    char* nome{};
     cout << "----------------------\n";
     cout << "Digite sua nome:    " << endl;
 
-    char* b, password[100];
+    char* password{};
     cout << "----------------------\n";
     cout << "Digite sua senha:    " << endl;
 
@@ -167,7 +167,6 @@ int registrar() {
     printf("\n O usuario com o email: %s Foi inserido\n", email);
     mysql_close(conn);
 
-    return;
 }
 
 //display tic tac toe
@@ -188,6 +187,7 @@ std::pair<std::string, char*> displayMenu()
     int acc = 1;
     char* email_1;
     char* email_2;
+
     for (int i; i < acc; i--) {
         cout << "Menu" << endl;
         cout << "----------------------\n";
