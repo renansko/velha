@@ -4,22 +4,36 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
+#include "seguro.h"
 
 using namespace std;
 
 char numbers[9] = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 char digit[9] = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
+const char* password = seguro;
+const char* user = user;
 
-
-int bd()
+void bd()
 {
     MYSQL* conn = mysql_init(NULL);
 
-    if (mysql_real_connect(conn, "localhost", "root", "16032001",
-        "velha", 0, NULL, 0) == NULL)
+    if (mysql_real_connect(conn, "localhost", user, password,
+        NULL, 0, NULL, 0) == NULL)
     {
 
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
+        exit(1);
+    }
+
+    if (mysql_query(conn, "CREATE DATABASE IF NOT EXISTS velha;")) {
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
+        exit(1);
+    }
+
+    if (mysql_query(conn, "USE velha;")) {
         fprintf(stderr, "%s\n", mysql_error(conn));
         mysql_close(conn);
         exit(1);
@@ -37,13 +51,11 @@ int bd()
         exit(1);
     }
 
-
     mysql_close(conn);
-    return true;
 }
 
-//login
 
+//login
 char* login(void)
 {
     MYSQL* conn = mysql_init(NULL);
@@ -54,8 +66,8 @@ char* login(void)
         exit(1);
     }
 
-    if (mysql_real_connect(conn, "localhost", "root", "16032001",
-        "velha", 0, NULL, 0) == NULL)
+    if (mysql_real_connect(conn, "localhost", user, password,
+        NULL, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "%s\n", mysql_error(conn));
         mysql_close(conn);
@@ -102,8 +114,8 @@ int registrar() {
         exit(1);
     }
 
-    if (mysql_real_connect(conn, "localhost", "root", "16032001",
-        "velha", 0, NULL, 0) == NULL)
+    if (mysql_real_connect(conn, "localhost", user, password,
+        NULL, 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "%s\n", mysql_error(conn));
         mysql_close(conn);
@@ -191,11 +203,11 @@ std::pair<std::string, char*> displayMenu()
         while (fgets(s, sizeof(s), stdin)) {
             n = strtol(s, &p, 10);
             if (p == s || *p != '\n') {
-                printf("Please enter an integer: ");
+                printf("porfavor digite um numero: ");
             }
             else break;
         }
-        printf("You entered: %ld\n", n);
+        printf("Voce digitou: %ld\n", n);
         switch (n)
         {
         case 1:
