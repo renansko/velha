@@ -212,7 +212,7 @@ std::pair<std::string, char*> displayMenu()
         case 2:
             system("cls");
             printf("registrar");
-            //registrar();
+            registrar();
             displayMenu();
 
         default:
