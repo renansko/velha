@@ -11,8 +11,8 @@ using namespace std;
 char numbers[9] = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 char digit[9] = { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
-char* password = seguro;
-char* user = username;
+//char* password = seguro;
+//char* user = username;
 
 void bd()
 {
@@ -39,7 +39,7 @@ void bd()
         exit(1);
     }
 
-    if (mysql_query(conn, "CREATE TABLE IF NOT EXISTS USERS(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255), email VARCHAR(255), password varchar(255))")) {
+    if (mysql_query(conn, "CREATE TABLE IF NOT EXISTS USERS(id INT PRIMARY KEY AUTO_INCREMENT, name VARCHAR(255) NOT NULL, email VARCHAR(255) NOT NULL, password varchar(255) NOT NULL) ")) {
         fprintf(stderr, "%s\n", mysql_error(conn));
         mysql_close(conn);
         exit(1);
@@ -59,7 +59,10 @@ void bd()
 char* login(void)
 {
     MYSQL* conn = mysql_init(NULL);
+    MYSQL_ROW row;
+    MYSQL_RES* result;
     char query[150] = "";
+    char c;
    
     if (!conn) {
         cout << "falha no mysql_init()" << endl;
@@ -67,35 +70,48 @@ char* login(void)
     }
 
     if (mysql_real_connect(conn, "localhost", user, password,
-        NULL, 0, NULL, 0) == NULL)
+        "velha", 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "%s\n", mysql_error(conn));
         mysql_close(conn);
         exit(1);
     }
 
-    char* email{};
     cout << "----------------------\n";
-    cout << "Digite sua nome:    " << endl;
+    cout << "Digite seu email:    " << endl;
+    char email[100];
+    fgets(email, 99, stdin);
+    email[strcspn(email, "\n")] = 0;
 
-    char* password{};
+    while ((c = getchar()) != '\n' && c != EOF) {};
+
+    
     cout << "----------------------\n";
     cout << "Digite sua senha:    " << endl;
+    char password[100];
+    fgets(password, 99, stdin);
+    password[strcspn(password, "\n")] = 0;
+    while ((c = getchar()) != '\n' && c != EOF) {};
     const char* value = "*";
     const char* table = "USERS";
 
-    fgets(email, sizeof(email), stdin);
+    
 
-    sprintf_s(query, "select * from '%s' where email = '%s' AND password = '%s'", table, email, password);
+    sprintf_s(query, "select * from %s where email = '%s' AND password = '%s'", table, email, password);
 
-    MYSQL_RES* result = mysql_store_result(conn);
-    if (mysql_query(conn, query) != 0)
+    
+    if (mysql_query(conn, query))
     {
         printf("\nFalha de consulta");
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
     }
-    else if (result == NULL)
+    result = mysql_use_result(conn);
+    if((row = mysql_fetch_row(result)) == NULL)
     {
         printf("\n credenciais invalidas!");
+        fprintf(stderr, "%s\n", mysql_error(conn));
+        mysql_close(conn);
         exit(1);
     }
 
@@ -105,9 +121,14 @@ char* login(void)
     return email;
 }
 
-void registrar() {
+int registrar() {
+
+    system("cls");
     MYSQL* conn = mysql_init(NULL);
+    MYSQL_ROW row;
+    MYSQL_RES* result;
     char query[150] = "";
+    int res;
 
     if (!conn) {
         cout << "falha no mysql_init()" << endl;
@@ -115,7 +136,7 @@ void registrar() {
     }
 
     if (mysql_real_connect(conn, "localhost", user, password,
-        NULL, 0, NULL, 0) == NULL)
+        "velha", 0, NULL, 0) == NULL)
     {
         fprintf(stderr, "%s\n", mysql_error(conn));
         mysql_close(conn);
@@ -125,48 +146,66 @@ void registrar() {
     cout << "REGISTRAR" << endl;
     cout << "----------------------\n";
     cout << "Digite seu email:    " << endl;
-    char* email;
+    char email[100];
 
     const char* value = "*";
     const char* table = "USERS";
+    char c;
 
-    fgets(email, sizeof(email), stdin);
+    fgets(email, 99, stdin);
+    email[strcspn(email, "\n")] = 0;
+	while ((c = getchar()) != '\n' && c != EOF) {};
 
-    sprintf_s(query, "select * from '%s' where email = '%s'", table, email);
-    MYSQL_RES* result = mysql_store_result(conn);
-    if (mysql_query(conn, query) != 0)
+    if (mysql_query(conn, query))
     {
         printf("\nFalha de consulta");
+        mysql_close(conn);
+        exit(0);
     }
-    else if (result != NULL)
+    result = mysql_use_result(conn);
+    if ((row = mysql_fetch_row(result)) != NULL)
     {
-        printf("\n ja existe um usuario com esse email");
-        exit(1);
+        printf("\n ja existe um usuario com esse email \n");
+        printf("\n\n\n %i , %s, %s , %s \n", row[0], row[1], row[2], row[3]);
+
+        mysql_close(conn);
+        exit(0);
     }
 
-    char* nome{};
+    char nome[100];
     cout << "----------------------\n";
     cout << "Digite sua nome:    " << endl;
 
-    char* password{};
+    fgets(nome, 99, stdin);
+    nome[strcspn(nome, "\n")] = 0;
+    while ((c = getchar()) != '\n' && c != EOF) {};
+
+
+    char password[100];
     cout << "----------------------\n";
     cout << "Digite sua senha:    " << endl;
 
-    sprintf_s(query, "INSERT INTO '%s' (name, email, password) values('%s','%s','%s'); ", table, nome, email, password);
+    fgets(password, 99, stdin);
+    password[strcspn(password, "\n")] = 0;
 
-    if (mysql_query(conn, query) != 0)
+    while ((c = getchar()) != '\n' && c != EOF) {};
+
+    sprintf_s(query, "INSERT INTO %s (name, email, password) values('%s','%s','%s'); ", table, nome, email, password);
+
+    if (!mysql_query(conn, query))
     {
-        printf("\nFalha de consulta");
+        printf("\n O usuario com o email: %s Foi inserido\n", email);
+        mysql_close(conn);
     }
-    else if (result == NULL)
+    else if (mysql_errno(conn)) 
     {
         printf("\n nao foram inseridos nenhum usuario");
-        exit(1);
+        printf("Error %u: %s", mysql_errno(conn), mysql_error(conn));
+        mysql_close(conn);
+        exit(0);
     }
 
-    printf("\n O usuario com o email: %s Foi inserido\n", email);
-    mysql_close(conn);
-
+    return 1;
 }
 
 //display tic tac toe
@@ -182,18 +221,19 @@ void display()
     cout << endl;
 }
 
-std::pair<std::string, char*> displayMenu()
+std::pair<std::string, std::string> displayMenu()
 {
-    int acc = 1;
-    char* email_1;
-    char* email_2;
+    system("cls");
+    int acc = 2;
+    char* email_1 = nullptr;
+    char* email_2 = nullptr;
 
-    for (int i; i < acc; i--) {
+    for (int i = 1; i <= acc; i++) {
         cout << "Menu" << endl;
         cout << "----------------------\n";
-        cout << "Login do :" << acc << " player digite 1." << endl;
+        cout << "Login do :" << i << " player digite 1." << endl;
         cout << "----------------------\n";
-        cout << "Registrar o:" << acc << " player digite 2." << endl;
+        cout << "Registrar o:" << i << " player digite 2." << endl;
         cout << "----------------------\n";
         cout << "Sair digite qualquer outro numero." << endl;
 
@@ -213,25 +253,34 @@ std::pair<std::string, char*> displayMenu()
         case 1:
             system("cls");
             printf("login");
-            if (acc == 1) {
+            if (i == 1) {
                 email_1 = login();
                 
             }
-            if (acc == 0) {
+            if (i == 2) {
                 email_2 = login();
+                break;
             }
+           
+            continue;
 
         case 2:
             system("cls");
             printf("registrar");
-            registrar();
-            displayMenu();
+ 
+            if (registrar() == 1) {
+                //displayMenu();
+                system("cls");
+                continue;
+            }
+            break;
 
         default:
             exit(0);
         }
 
         string tmp_string(email_1);
+        string tmp_string_2(email_2);
        
         return std::make_pair(email_1, email_2);
     }
@@ -333,18 +382,21 @@ public:
 
 int main()
 {
+  
+
     bd();
-    std::pair<std::string, char*> player = displayMenu();
+    std::pair<std::string, std::string> player = displayMenu();
 
     std::string player_1 = player.first;
-    char* player_2 = player.second;
-
+    std::string player_2 = player.second;
+    std::string temp;
     char number;
     Players player1;
     Players player2;
 
+
     cout << "\tTic Tac Toe" << endl;
-    cout << "Player 1 (X)  -  Player 2 (O)" << endl;
+    cout << player_1  << " 'player 1' (X) - " << player_2 << " 'player 2' (O)" << endl;
     display();
 
     //switch between players
