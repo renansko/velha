@@ -415,8 +415,6 @@ public:
 
 int main()
 {
-  
-
     bd();
     std::pair<std::string, std::string> player = displayMenu();
 
